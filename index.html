@@ -123,45 +123,80 @@
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
 
-        canvas.addEventListener('mousedown', (e) => {
+        // Eventos para dispositivos de escritorio
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        // Eventos táctiles para dispositivos móviles
+        canvas.addEventListener('touchstart', startDrawingTouch);
+        canvas.addEventListener('touchmove', drawTouch);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function startDrawing(e) {
             isDrawing = true;
-            draw(e.clientX, e.clientY, false);
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            if (isDrawing) {
-                draw(e.clientX, e.clientY, true);
-            }
-        });
-
-        canvas.addEventListener('mouseup', () => {
-            isDrawing = false;
-        });
-
-        canvas.addEventListener('mouseleave', () => {
-            isDrawing = false;
-        });
-
-        function draw(x, y, isDrawing) {
-            const rect = canvas.getBoundingClientRect(); // Obtener la posición del lienzo en la ventana
-
-            // Calcular las coordenadas relativas al lienzo centrado
-            const offsetX = rect.left + window.scrollX;
-            const offsetY = rect.top + window.scrollY;
-
-            if (!isDrawing) {
-                ctx.beginPath();
-                ctx.moveTo(x - offsetX, y - offsetY); // Ajustar las coordenadas
-            } else {
-                ctx.lineTo(x - offsetX, y - offsetY); // Ajustar las coordenadas
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 20; // Aumentar el tamaño del trazo
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.stroke();
-            }
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
         }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 20;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function startDrawingTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            isDrawing = true;
+        }
+
+        function drawTouch(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 20;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        // Limpiar el lienzo
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            isDrawing = false; // Detener el dibujo si se estaba realizando
+        }
+
+        // Llamar a la función para limpiar el lienzo al hacer clic en el botón "Limpiar"
+        const clearButton = document.getElementById('clearButton');
+        clearButton.addEventListener('click', clearCanvas);
     }
+
 
     // Ejecutar la función de inicialización del lienzo cuando la página se cargue
     window.onload = function() {
