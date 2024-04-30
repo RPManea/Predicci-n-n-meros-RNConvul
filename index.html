@@ -40,12 +40,14 @@
                     <tr>
                         <th>Modo 1 (Denso)</th>
                         <th>Modo 2 (Conv)</th>
+                        <th>Modo 3 (Conv+AumentoDatos+Dropout)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><div id="prediction" class="resultado"></div></td>
                         <td><div id="predictionV2" class="resultado"></div></td>
+                        <td><div id="predictionV3" class="resultado"></div></td>
                     </tr>
                 </tbody>
             </table>
@@ -64,6 +66,12 @@
     // Cargar el modelo v2
     async function loadModelV2() {
         const model = await tf.loadLayersModel('modelv2.json');
+        return model;
+    }
+
+    // Cargar el modelo v2
+    async function loadModelV3() {
+        const model = await tf.loadLayersModel('modelv3.json');
         return model;
     }
 
@@ -106,6 +114,14 @@
         // Obtener el índice de la clase con la mayor probabilidad para el modelo v2
         const predictedClassV2 = predictionV2.argMax(1).dataSync()[0];
         document.getElementById('predictionV2').innerText = predictedClassV2;
+
+        // Cargar el modelo v3
+        const modelV3 = await loadModelV3();
+        // Realizar la predicción con el modelo v3
+        const predictionV3 = modelV3.predict(input);
+        // Obtener el índice de la clase con la mayor probabilidad para el modelo v3
+        const predictedClassV3 = predictionV3.argMax(1).dataSync()[0];
+        document.getElementById('predictionV3').innerText = predictedClassV3;
     }
 
     // Limpiar el lienzo
@@ -115,6 +131,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         document.getElementById('prediction').innerText = '';
         document.getElementById('predictionV2').innerText = '';
+        document.getElementById('predictionV3').innerText = '';
     }
 
     // Inicializar el lienzo para dibujar
